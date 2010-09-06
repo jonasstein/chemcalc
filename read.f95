@@ -1,8 +1,7 @@
 program readchem
   implicit none
 
-  character(len=50) :: chemeq = "HCl23HO23JPIS24G"
-  character(len=1) :: this_char
+  character(len=50) :: chemeq = "H23Cl23Cer89HO23JPIS24GZ"
 
   character, dimension(50,3) :: eqsymbols
   integer, dimension(50) :: eqquantity
@@ -12,131 +11,107 @@ program readchem
   integer :: numberofsymbols = 0 
   integer :: lengthofeqstring = 0
 
-  ! functions
-  logical :: isuppercase
-  logical :: islowercase
-  logical :: isbetween
-  logical :: isdigit
+  integer :: apos, bpos
 
+  integer :: thisquantity
+  character(len=3) :: thissymbol
+
+
+  logical :: debug = .true.
+
+  integer :: step
+  character (len=26) :: ABC_upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  character (len=26) :: abc_lower = "abcdefghijklmnopqrstuvwxyz"
+  character (len=10) :: numbers = "0123456789"
 
   write(*,*) "enter chemical equation:"
   ! read(*,*) chemeq
 
+  write(*,*) chemeq
+  write(*,*) numbers(2:)
 
-  ! ============================
-  ! count chemical symbols
-  ! ============================
-  write(*,*) len(chemeq)
-  do position = 1, len(chemeq)
-     this_char = chemeq(position:position)  
-     if (this_char == "") then
-        ! no more data in equation string
-        exit
-     elseif (isuppercase(this_char)) then
-        numberofsymbols = numberofsymbols + 1
-     end if
-       lengthofeqstring = position
-  end do
-  write(*,*) numberofsymbols, "chemical symbols detected"
+  lengthofeqstring = len(chemeq)
 
 
   ! ============================
   ! parse the equation string
   ! ============================
 
-  do position = 1, lengthofeqstring
-     this_char = chemeq(position:position)  
-     write(*,*) position, this_char, ichar(this_char)
 
-     if (isuppercase(this_char)) then
-        write(*,*) "das war gross"
-     
-     elseif(islowercase(this_char)) then 
-        write(*,*) "das war klein"
-     elseif(isdigit(this_char)) then 
-        write(*,*) "das war zahl"
-        eqquantity(position) = strtoint(this_char)
+
+  position = 1 
+  step = 1
+
+  do while (position < lengthofeqstring)
+
+     ! walk over the equation 
+     if (scan(chemeq(position+1:), ABC_upper) == 0) then
+        bpos = lengthofeqstring
      else
-        write(*,*) "EE: could not parse equation"
-        exit
-     end if
+        bpos = scan(chemeq(position+1:), ABC_upper) + position
+     endif
+
+     apos = scan(chemeq(position:), ABC_upper) + position - 1
 
 
-!!$      CHARACTER*8 DATE
-!!$           INTEGER MONTH, DAY, YEAR
-!!$
-!!$           INTEGER MONTH2, DAY2, YEAR2
-!!$           MONTH = 7
-!!$           DAY = 4
-!!$           YEAR = 93
-!!$
-!!$           WRITE (DATE,10) MONTH, DAY, YEAR
-!!$        10 FORMAT (I2,'/',I2,'/',I2)
-!!$           READ (DATE,20) MONTH2, DAY2, YEAR2
-!!$       20  FORMAT (I2,1X,I2,1X,I2)
+     if (debug) then
+        write(*,*) " "
+        write(*,*) "=====(next sequenze)=================================="
+        write(*,*) "parsing this part:",  chemeq(apos:bpos-1)
+     endif
 
 
+     ! ===============================
+     ! Search for chemical symbol
+     ! ===============================
+     if (scan(chemeq(apos:bpos-1), abc_lower, .true.) >0) then
+        thissymbol = chemeq(apos:apos-1+(scan(chemeq(apos:bpos-1), abc_lower, .true.)))
+     else 
+        thissymbol = chemeq(apos:apos)
+     endif
 
 
+     if (debug) then
+        write(*,*) "chemical symbol:", thissymbol
+     endif
+
+
+     ! ===============================
+     ! Search for quantifier
+     ! ===============================
+
+     if (scan(chemeq(apos:bpos-1), numbers, .true.) >0) then
+        read(chemeq(apos-1+(scan(chemeq(apos:bpos-1), numbers)):bpos-1 ), '(I3)' ) thisquantity
+     else
+        thisquantity = 1
+     endif
+
+     if (debug) then
+        write(*,'(A,I4)') "quantity:", thisquantity
+     endif
+
+
+     eqquantity(step) = thisquantity
+
+     position = bpos
+     step = step + 1 
   end do
 
-  write(*,*) eqsymbols
-  write(*,*) eqquantity(1:10)
-
-  !  logi =  isuppercase( "A" )
-  if (lle("A", "D") .and. lle("D", "Z") )  then 
-     write(*,*) "13"
-  else 
-     write(*,*) "12"
-  end if
+  write(*,*)  chemeq(1:)
+  write(*,*)  eqquantity
 
 
-  if (.true.) then 
-     write(*,*) "GGG"
-  end if
 
-  write(*,*) isuppercase("A") 
+
+  !  write(*,*) eqsymbols
+  !  write(*,*) eqquantity(1:10)
+
+
 
 end program readchem
 
 
 
-logical function isuppercase(mychar)
-  implicit none
-  character, intent(in) :: mychar
-  logical :: isbetween
-
-  isuppercase = isbetween(mychar,"A","Z")
-end function isuppercase
-
-
-logical function islowercase(mychar)
-  implicit none
-  character, intent(in) :: mychar
-  logical :: isbetween
-
-  islowercase = isbetween(mychar,"a","z")
-end function islowercase
-
-
-logical function isdigit(mychar)
-  implicit none
-  character, intent(in) :: mychar
-  logical :: isbetween
-
-  isdigit = isbetween(mychar,"0","9")
-end function isdigit
-
-logical function isbetween(mychar,firstchar,lastchar)
-  implicit none
-  character, intent(in) :: mychar, firstchar, lastchar
-
-  if (lle(firstchar, mychar) .and. lle(mychar, lastchar) )  then 
-     isbetween = .true.
-  else 
-     isbetween = .false.
-  end if
-end function isbetween
 
 
 
