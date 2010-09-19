@@ -1,6 +1,8 @@
 program readchem
-  implicit none
 
+  use global_knowledge_of_letters
+
+  implicit none
   character(len=50) :: chemeq = "H23Cl23Cer89HO23JPIS24GZ"
 
   character, dimension(50,3) :: eqsymbols
@@ -20,9 +22,6 @@ program readchem
   logical :: debug = .true.
 
   integer :: step
-  character (len=26) :: ABC_upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-  character (len=26) :: abc_lower = "abcdefghijklmnopqrstuvwxyz"
-  character (len=10) :: numbers = "0123456789"
 
   write(*,*) "enter chemical equation:"
   ! read(*,*) chemeq
@@ -113,5 +112,14 @@ end program readchem
 
 
 
+module global_knowledge_of_letters
+  implicit none
 
+  save
+
+  character (len=26), parameter :: ABC_upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  character (len=26), parameter :: abc_lower = "abcdefghijklmnopqrstuvwxyz"
+  character (len=10), parameter :: numbers = "0123456789"
+
+end module global_knowledge_of_letters
 
