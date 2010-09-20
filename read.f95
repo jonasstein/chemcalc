@@ -1,10 +1,18 @@
-program readchem
+module globalknowledgeofletters
+  character (len=26), parameter :: ABC_upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  character (len=26), parameter :: abc_lower = "abcdefghijklmnopqrstuvwxyz"
+  character (len=10), parameter :: numbers = "0123456789"
+end module globalknowledgeofletters
 
-  implicit none
+
+
+module elements
+  save
 
   type element
+     integer :: atomnumber
      character(len=3) :: name
-  end  type element
+  end type element
 
 
   type formula
@@ -12,16 +20,102 @@ program readchem
      type(element), dimension(1000) :: element
      integer, dimension(1000) :: quantity
   end type formula
+ 
+  
+end module elements
 
 
-  character (len=26), parameter :: ABC_upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-  character (len=26), parameter :: abc_lower = "abcdefghijklmnopqrstuvwxyz"
-  character (len=10), parameter :: numbers = "0123456789"
-
-
+module mydebug
+save
+  logical :: debug = .false. ! .true.   
   ! True = The Programm should be very verbous;
   ! False = normal mode
-  logical, parameter :: debug = .true.   
+
+
+contains
+  subroutine debugmode(myswitch)
+    logical :: myswitch
+    debug = myswitch
+  end subroutine debugmode
+
+  subroutine debugme(anyvar)
+    character(len=80) :: anyvar
+    write(*,*) anyvar
+  end subroutine debugme
+
+end module mydebug
+
+
+
+module pse
+save 
+
+contains
+
+
+  subroutine initdb
+
+    integer :: filelength_as_lines = -1
+    integer :: io_error
+    integer, parameter :: ChemDB = 900
+    integer :: ordnungszahl
+    character (len =70) :: zeichenkette
+    character (len =3) :: findelement = "Ge"
+    character (len =3) :: elementname
+
+    character (len =30) ::  ChemFMT = '(I3, 2X, A3, A10)'
+    open(unit=ChemDB,file='elements.dat',status='old',action='read', &
+         iostat=io_error)
+
+
+    write(*,*) filelength_as_lines
+
+    if (io_error == 0) then
+
+
+       do 
+          read(ChemDB,ChemFMT) ordnungszahl, elementname, zeichenkette 
+!          write(*,*) ordnungszahl
+          if (ordnungszahl == 999) then 
+             exit 
+          end if
+
+          if (elementname == findelement) then  
+             write(*,*) ordnungszahl, elementname, zeichenkette
+          end if
+       end do
+
+    else
+       write(*,*) 'Could not open database error', &
+            io_error,' will exit now.'
+    end if
+
+    close(unit=ChemDB)
+    return
+  end subroutine initdb
+
+end module pse
+
+
+
+
+
+
+
+program readchem
+  use mydebug
+  use elements
+  use globalknowledgeofletters
+  use pse
+
+
+  implicit none
+
+
+
+
+  type(formula), dimension(50) :: myform
+
 
 
   character(len=50) :: chemeq = "H23Cl23Cer89HO23JPIS24GZ"
@@ -41,11 +135,11 @@ program readchem
 
   integer :: step
 
+  character(len=80) :: debugstring
+
   write(*,*) "enter chemical equation:"
   ! read(*,*) chemeq
 
-  write(*,*) chemeq
-  write(*,*) numbers(2:)
 
   lengthofeqstring = len(chemeq)
 
@@ -117,27 +211,9 @@ program readchem
   write(*,*)  chemeq(1:)
   write(*,*)  eqquantity
 
+  write(debugstring,*) step 
+  call debugme(debugstring)
 
-  !  write(*,*) eqsymbols
-  !  write(*,*) eqquantity(1:10)
-
-
-
-
-contains
-
-
-
-! ===============================
-! FUNCTION part
-! ===============================
-
-!!$function getformula result formulastring
-!!$  implicit none
-!!$  character (len=79) :: formulastring
-!!$
-!!$  getformula = "H23Cl23Cer89HO23JPIS24GZ"
-!!$
-!!$end function getformula
+call initdb
 
 end program readchem
