@@ -1,8 +1,29 @@
 program readchem
 
-  use global_knowledge_of_letters
-
   implicit none
+
+  type element
+     character(len=3) :: name
+  end  type element
+
+
+  type formula
+     integer :: length
+     type(element), dimension(1000) :: element
+     integer, dimension(1000) :: quantity
+  end type formula
+
+
+  character (len=26), parameter :: ABC_upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  character (len=26), parameter :: abc_lower = "abcdefghijklmnopqrstuvwxyz"
+  character (len=10), parameter :: numbers = "0123456789"
+
+
+  ! True = The Programm should be very verbous;
+  ! False = normal mode
+  logical, parameter :: debug = .true.   
+
+
   character(len=50) :: chemeq = "H23Cl23Cer89HO23JPIS24GZ"
 
   character, dimension(50,3) :: eqsymbols
@@ -17,9 +38,6 @@ program readchem
 
   integer :: thisquantity
   character(len=3) :: thissymbol
-
-
-  logical :: debug = .true.
 
   integer :: step
 
@@ -100,26 +118,26 @@ program readchem
   write(*,*)  eqquantity
 
 
-
-
   !  write(*,*) eqsymbols
   !  write(*,*) eqquantity(1:10)
 
 
 
+
+contains
+
+
+
+! ===============================
+! FUNCTION part
+! ===============================
+
+!!$function getformula result formulastring
+!!$  implicit none
+!!$  character (len=79) :: formulastring
+!!$
+!!$  getformula = "H23Cl23Cer89HO23JPIS24GZ"
+!!$
+!!$end function getformula
+
 end program readchem
-
-
-
-
-module global_knowledge_of_letters
-  implicit none
-
-  save
-
-  character (len=26), parameter :: ABC_upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-  character (len=26), parameter :: abc_lower = "abcdefghijklmnopqrstuvwxyz"
-  character (len=10), parameter :: numbers = "0123456789"
-
-end module global_knowledge_of_letters
-
