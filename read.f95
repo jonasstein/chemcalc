@@ -1,9 +1,8 @@
 module globalknowledgeofletters
-  character (len=26), parameter :: ABC_upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-  character (len=26), parameter :: abc_lower = "abcdefghijklmnopqrstuvwxyz"
-  character (len=10), parameter :: numbers = "0123456789"
+  character(len=26), parameter :: ABC_upper="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  character(len=26), parameter :: abc_lower="abcdefghijklmnopqrstuvwxyz"
+  character(len=10), parameter :: numbers="0123456789"
 end module globalknowledgeofletters
-
 
 
 module elements
@@ -15,13 +14,27 @@ module elements
   end type element
 
 
+
   type formula
-     integer :: length
-     type(element), dimension(1000) :: element
-     integer, dimension(1000) :: quantity
+     integer :: length = 0
+     character (len=3), dimension(1000) :: element
+     integer,  dimension(1000) :: quantity
   end type formula
- 
-  
+
+
+  type(formula) :: UsersFormula
+
+contains
+
+  subroutine PrintUsersFormula
+    write(*,*) "oooo" !UsersFormula%length
+  end subroutine PrintUsersFormula
+
+  subroutine InsertToUsersFormula(symbol, quantity)
+
+  end subroutine InsertToUsersFormula
+
+
 end module elements
 
 
@@ -87,6 +100,12 @@ end module pse
 
 
 
+! =============================================
+! main programm starts here
+! =============================================
+
+
+
 program readchem
   use mydebug
   use elements
@@ -97,11 +116,7 @@ program readchem
   implicit none
 
 
-
-
-  type(formula), dimension(50) :: myform
-
-
+!  call PrintUsersFormula
 
   character(len=50) :: chemeq = "H23Cl23Cer89HO23JPIS24GZ"
 
@@ -202,3 +217,10 @@ program readchem
 call initdb
 
 end program readchem
+
+
+! print database
+! print parsed formula
+! add item to formula
+! objects
+! 
