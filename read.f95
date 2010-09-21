@@ -49,40 +49,29 @@ end module mydebug
 
 module pse
 save 
-
 contains
 
 
   subroutine initdb
-
-    integer :: filelength_as_lines = -1
     integer :: io_error
     integer, parameter :: ChemDB = 900
     integer :: ordnungszahl
+    integer :: filelength_as_lines = -1
+
     character (len =70) :: zeichenkette
     character (len =3) :: findelement = "Ge"
     character (len =3) :: elementname
-
+    character (len =80) :: datarow
     character (len =30) ::  ChemFMT = '(I3, 2X, A3, A10)'
     open(unit=ChemDB,file='elements.dat',status='old',action='read', &
          iostat=io_error)
 
 
-    write(*,*) filelength_as_lines
-
     if (io_error == 0) then
-
-
        do 
-          read(ChemDB,ChemFMT) ordnungszahl, elementname, zeichenkette 
-!          write(*,*) ordnungszahl
-          if (ordnungszahl == 999) then 
-             exit 
-          end if
-
-          if (elementname == findelement) then  
-             write(*,*) ordnungszahl, elementname, zeichenkette
-          end if
+          read(ChemDB, '(A)', iostat=io_error) datarow
+          if (io_error /= 0) exit
+          write(*,*) datarow
        end do
 
     else
@@ -95,10 +84,6 @@ contains
   end subroutine initdb
 
 end module pse
-
-
-
-
 
 
 
