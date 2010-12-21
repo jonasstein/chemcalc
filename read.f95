@@ -65,7 +65,6 @@ end module mydebug
 
 
 
-
 module pse
 save 
 contains
@@ -74,8 +73,7 @@ contains
   integer function getdblength()
     integer :: io_error
     integer, parameter :: ChemDB = 900
-    integer :: ordnungszahl
-    integer :: filelength_as_lines = -1
+    integer :: linenumber 
 
     character (len =80) :: datarow
 
@@ -84,56 +82,73 @@ contains
 
     if (io_error == 0) then
        write(*,*) "II: file elements.dat found and accessible."
-    else
-       write(*,*) "EE: can not open file elements.dat will exit now."
-    end if
+       linenumber = 0
 
-
-    if (io_error == 0) then
-       do 
-         filelength_as_lines = filelength_as_lines + 1
-         read(ChemDB, '(A)', iostat=io_error) datarow
-         write(*,*) filelength_as_lines, datarow
-         if (io_error /= 0) exit
-       end do
-
-       return
-    end if
-
-    close(unit=ChemDB)
-    return
-  end function getdblength
-
-  subroutine getmassfromelement
-    integer :: io_error
-    integer, parameter :: ChemDB = 900
-    integer :: ordnungszahl
-    integer :: filelength_as_lines = -1
-
-    character (len =70) :: zeichenkette
-    character (len =3) :: findelement = "Ge"
-    character (len =3) :: elementname
-    character (len =80) :: datarow
-    character (len =30) ::  ChemFMT = '(I3, 2X, A3, A10)'   ! Ordnungszahl, Symbol, Name, Molmasse, Sonstiges
-    open(unit=ChemDB,file='elements.dat',status='old',action='read', &
-         iostat=io_error)
-
-
-    if (io_error == 0) then
        do 
           read(ChemDB, '(A)', iostat=io_error) datarow
           if (io_error /= 0) exit
+          linenumber = linenumber + 1
+          write(*,*) "found dataset No.", linenumber
           write(*,*) datarow
        end do
 
     else
-       write(*,*) 'Could not open database error', &
-            io_error,' will exit now.'
+       write(*,*) "EE: can not open file elements.dat program will exit now."
+       linenumber = -1
     end if
 
     close(unit=ChemDB)
+    getdblength = linenumber
     return
-  end subroutine getmassfromelement
+  end function getdblength
+
+  real function getmassfromelement(searchsymbol)
+    integer :: io_error
+    integer, parameter :: ChemDB = 900
+
+    integer :: maxlines
+    integer :: linenumber=0
+
+    character (len =3) :: searchsymbol
+
+
+    character (len =80) :: datarow
+    character (len =30) ::  ChemFMT = '(I3, 1X, A3, 1X A20, F1.6, F1.4)'   ! Ordnungszahl, Symbol, Name, Molmasse, FooWert
+
+!! EXAMPLE:
+!!1   H   Wasserstoff          1.007947       3.0079
+!!2   He  Helium               4.002602       4.0026
+!!3   Li  Lithium              6.941223       8.2941
+!!4   Be  Beryllium            9.012182       1.0122
+
+    integer :: dbord
+    character (len =3) :: dbsym
+    character (len =10) :: dbname
+    real :: dbatommass
+    real :: dbelektrons
+
+    maxlines = getdblength()
+
+    open(unit=ChemDB,file='elements.dat',status='old',action='read', &
+         iostat=io_error)
+
+
+    do while (linenumber <= maxlines)
+       linenumber = linenumber + 1
+       read(unit=ChemDB, fmt=ChemFMT, iostat=io_error) datarow
+
+       if (io_error /= 0) exit
+       write(*,*) datarow
+    end do
+
+    close(unit=ChemDB)
+    getmassfromelement = 0.1
+    return
+  end function getmassfromelement
+
+
+
+
 
 end module pse
 
@@ -255,7 +270,8 @@ program readchem
 
 ! call initdb
 
-write(*,*) getdblength()
+! write(*,*) "Datenbank ist so lang: " getdblength()
+write(*,*) getmassfromelement("Ge")
 
 end program readchem
 
@@ -265,3 +281,10 @@ end program readchem
 ! add item to formula
 ! objects
 ! 
+
+
+
+! TODO
+! Inent in/out
+! parameter
+! Kommentare
