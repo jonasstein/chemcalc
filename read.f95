@@ -56,7 +56,13 @@ contains
     write(*,*) anyvar
   end subroutine debugme
 
+  subroutine logme(message)
+    character(len=80) :: message
+    write(*,*) message
+  end subroutine logme
+
 end module mydebug
+
 
 
 
@@ -65,7 +71,40 @@ save
 contains
 
 
-  subroutine initdb
+  integer function getdblength()
+    integer :: io_error
+    integer, parameter :: ChemDB = 900
+    integer :: ordnungszahl
+    integer :: filelength_as_lines = -1
+
+    character (len =80) :: datarow
+
+    open(unit=ChemDB,file='elements.dat',status='old',action='read', &
+         iostat=io_error)
+
+    if (io_error == 0) then
+       write(*,*) "II: file elements.dat found and accessible."
+    else
+       write(*,*) "EE: can not open file elements.dat will exit now."
+    end if
+
+
+    if (io_error == 0) then
+       do 
+         filelength_as_lines = filelength_as_lines + 1
+         read(ChemDB, '(A)', iostat=io_error) datarow
+         write(*,*) filelength_as_lines, datarow
+         if (io_error /= 0) exit
+       end do
+
+       return
+    end if
+
+    close(unit=ChemDB)
+    return
+  end function getdblength
+
+  subroutine getmassfromelement
     integer :: io_error
     integer, parameter :: ChemDB = 900
     integer :: ordnungszahl
@@ -75,7 +114,7 @@ contains
     character (len =3) :: findelement = "Ge"
     character (len =3) :: elementname
     character (len =80) :: datarow
-    character (len =30) ::  ChemFMT = '(I3, 2X, A3, A10)'
+    character (len =30) ::  ChemFMT = '(I3, 2X, A3, A10)'   ! Ordnungszahl, Symbol, Name, Molmasse, Sonstiges
     open(unit=ChemDB,file='elements.dat',status='old',action='read', &
          iostat=io_error)
 
@@ -94,7 +133,7 @@ contains
 
     close(unit=ChemDB)
     return
-  end subroutine initdb
+  end subroutine getmassfromelement
 
 end module pse
 
@@ -214,7 +253,9 @@ program readchem
   write(debugstring,*) step 
   call debugme(debugstring)
 
-call initdb
+! call initdb
+
+write(*,*) getdblength()
 
 end program readchem
 
